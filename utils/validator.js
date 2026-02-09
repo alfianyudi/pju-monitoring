@@ -37,6 +37,7 @@ function validateSensorData(data) {
     }
 
     // Validasi Cahaya
+    // ✅ CAHAYA 0 ADALAH NORMAL (kondisi sangat gelap)
     if (data.cahaya < LIGHT_MIN || data.cahaya > LIGHT_MAX) {
         errors.push({
             sensor: 'cahaya',
@@ -69,34 +70,57 @@ async function detectSensorError(pool, currentData) {
 
         // Cek jika nilai tetap sama (sensor tidak responsif)
         if (rows.length >= 5) {
-            // Cek tegangan
+            // =========================================
+            // CEK TEGANGAN
+            // =========================================
             const allTeganganSame = rows.every(row => row.tegangan === currentData.tegangan);
             if (allTeganganSame && currentData.tegangan === 0) {
                 errors.tegangan = 'Sensor tidak responsif (nilai tetap 0)';
                 hasError = true;
             }
 
-            // Cek arus
+            // =========================================
+            // CEK ARUS
+            // =========================================
             const allArusSame = rows.every(row => row.arus === currentData.arus);
             if (allArusSame && currentData.arus === 0) {
                 errors.arus = 'Sensor tidak responsif (nilai tetap 0)';
                 hasError = true;
             }
 
-            // Cek cahaya
+            // =========================================
+            // CEK CAHAYA
+            // ✅ CAHAYA 0 ADALAH NORMAL
+            // Hanya error jika SELALU 0 DAN ada pola tidak wajar
+            // =========================================
             const allCahayaSame = rows.every(row => row.cahaya === currentData.cahaya);
-            if (allCahayaSame && currentData.cahaya === 0) {
-                errors.cahaya = 'Sensor tidak responsif (nilai tetap 0)';
+            
+            // ❌ HAPUS CEK INI - Cahaya 0 adalah kondisi normal (sangat gelap)
+            // if (allCahayaSame && currentData.cahaya === 0) {
+            //     errors.cahaya = 'Sensor tidak responsif (nilai tetap 0)';
+            //     hasError = true;
+            // }
+            
+            // ✅ GANTI dengan: Hanya error jika nilai negatif atau di luar range max
+            if (currentData.cahaya < 0) {
+                errors.cahaya = 'Sensor cahaya error (nilai negatif)';
+                hasError = true;
+            } else if (currentData.cahaya > 100000) {
+                errors.cahaya = 'Sensor cahaya error (nilai terlalu tinggi)';
                 hasError = true;
             }
         }
 
-        // Cek nilai tidak wajar
+        // Cek nilai tidak wajar (tegangan & arus saja, skip cahaya)
         const validation = validateSensorData(currentData);
         if (!validation.valid) {
             validation.errors.forEach(err => {
-                errors[err.sensor] = err.message;
-                hasError = true;
+                // ✅ Hanya tambahkan error untuk tegangan dan arus
+                // Skip error cahaya karena 0 adalah normal
+                if (err.sensor !== 'cahaya' || (err.sensor === 'cahaya' && currentData.cahaya > 100000)) {
+                    errors[err.sensor] = err.message;
+                    hasError = true;
+                }
             });
         }
 
