@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sistem Monitoring PJU</title>
+    <title>Login - Sensor Lampu Penerangan Jalan</title>
     <style>
         /* =========================================
            RESET & BASE STYLES
@@ -51,16 +51,23 @@
         }
 
         .logo {
-            width: 140px;
-            height: 140px;
+            width: 150px;
+            height: 150px;
             background: white;
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 70px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             animation: logoFloat 3s ease-in-out infinite;
+            overflow: hidden;
+            padding: 10px;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         @keyframes logoFloat {
@@ -69,9 +76,9 @@
         }
 
         .thesis-title {
-            font-size: 18px;
+            font-size: 22px;
             line-height: 1.8;
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 30px;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             letter-spacing: 0.5px;
@@ -315,13 +322,12 @@
             }
 
             .logo {
-                width: 110px;
-                height: 110px;
-                font-size: 55px;
+                width: 120px;
+                height: 120px;
             }
 
             .thesis-title {
-                font-size: 15px;
+                font-size: 17px;
             }
 
             .author-name {
@@ -365,13 +371,12 @@
             }
 
             .logo {
-                width: 90px;
-                height: 90px;
-                font-size: 45px;
+                width: 100px;
+                height: 100px;
             }
 
             .thesis-title {
-                font-size: 13px;
+                font-size: 15px;
             }
 
             .author-info {
@@ -409,12 +414,14 @@
     <div class="login-container">
         <!-- Header Section -->
         <div class="login-header">
-            <!-- Logo -->
+            <!-- Logo UHO -->
             <div class="logo-container">
-                <div class="logo">🎓</div>
+                <div class="logo">
+                    <img src="assets/logo-uho.png" alt="Logo Universitas Halu Oleo">
+                </div>
             </div>
 
-            <!-- Thesis Title -->
+            <!-- Thesis Title (LEBIH BESAR) -->
             <div class="thesis-title">
                 Monitoring Kinerja Sensor Pada Lampu Penerangan Jalan Solar Cell Menggunakan Metode Moving Average Filter (MAF) Berbasis Internet of Things (IoT)
             </div>
@@ -493,10 +500,10 @@
             </form>
         </div>
 
-        <!-- Footer Section -->
+        <!-- Footer Section (UPDATED) -->
         <div class="login-footer">
-            <p class="copyright">&copy; 2025 Universitas Halu Oleo</p>
-            <p>Tugas Akhir - Tahun Akademik 2024/2025</p>
+            <p class="copyright">&copy; Universitas Halu Oleo</p>
+            <p>Tugas Akhir Skripsi</p>
         </div>
     </div>
 
@@ -594,3 +601,26 @@
     </script>
 </body>
 </html>
+```
+
+---
+
+## ✅ **PERUBAHAN YANG DILAKUKAN:**
+
+✅ **Logo UHO dari assets** - `<img src="assets/logo-uho.png">`  
+✅ **Judul lebih besar** - Font size: **22px** (dari 18px)  
+✅ **Judul lebih bold** - Font weight: **700** (dari 600)  
+✅ **Footer diupdate** - `© Universitas Halu Oleo` & `Tugas Akhir Skripsi`  
+✅ **Logo container lebih besar** - 150px × 150px  
+
+---
+
+## 📂 **PASTIKAN STRUKTUR FOLDER:**
+```
+pju-monitoring/
+└── public/
+    ├── assets/
+    │   └── logo-uho.png  ✅ PASTIKAN FILE INI ADA!
+    ├── login.html
+    ├── dashboard.html
+    └── ...
