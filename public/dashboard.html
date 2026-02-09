@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Monitoring PJU</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>⚡ MONITORING PJU</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item active">
+                    <span class="icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="grafik.html" class="nav-item">
+                    <span class="icon">📈</span>
+                    <span>Grafik Output Sensor</span>
+                </a>
+                <a href="riwayat.html" class="nav-item">
+                    <span class="icon">📋</span>
+                    <span>Riwayat Data</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <span class="icon">⚙️</span>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="nav-item" id="logoutBtn">
+                    <span class="icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>SISTEM MONITORING LAMPU PENERANGAN JALAN</h1>
+                <div class="user-info">
+                    <span id="userName">Admin</span>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- Sensor Cards -->
+                <div class="sensor-grid">
+                    <!-- Tegangan -->
+                    <div class="sensor-card card-blue">
+                        <div class="card-icon">⚡</div>
+                        <div class="card-content">
+                            <h3>Tegangan</h3>
+                            <div class="card-value">
+                                <span id="teganganValue">0</span>
+                                <span class="unit">V</span>
+                            </div>
+                            <div class="card-time" id="teganganTime">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Arus -->
+                    <div class="sensor-card card-green">
+                        <div class="card-icon">🔌</div>
+                        <div class="card-content">
+                            <h3>Sensor Arus</h3>
+                            <div class="card-value">
+                                <span id="arusValue">0</span>
+                                <span class="unit">A</span>
+                            </div>
+                            <div class="card-time" id="arusTime">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Cahaya -->
+                    <div class="sensor-card card-yellow">
+                        <div class="card-icon">💡</div>
+                        <div class="card-content">
+                            <h3>Cahaya</h3>
+                            <div class="card-value">
+                                <span id="cahayaValue">0</span>
+                                <span class="unit">Lux</span>
+                            </div>
+                            <div class="card-time" id="cahayaTime">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Sensor Gerak -->
+                    <div class="sensor-card card-red">
+                        <div class="card-icon">🚶</div>
+                        <div class="card-content">
+                            <h3>Sensor Gerak</h3>
+                            <div class="card-value">
+                                <span id="gerakValue">Tidak Terdeteksi</span>
+                            </div>
+                            <div class="card-time" id="gerakTime">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Control Panel -->
+                <div class="control-panel">
+                    <div class="control-card">
+                        <div class="control-header">
+                            <h3>🔦 Kontrol Lampu</h3>
+                            <div class="relay-status" id="relayStatusIndicator">
+                                <span class="status-dot status-off"></span>
+                                <span id="relayStatusText">OFF</span>
+                            </div>
+                        </div>
+
+                        <div class="control-body">
+                            <!-- Mode Toggle -->
+                            <div class="mode-control">
+                                <label class="mode-label">Mode Operasi:</label>
+                                <div class="toggle-group">
+                                    <button class="toggle-btn active" data-mode="auto" id="btnAuto">AUTO</button>
+                                    <button class="toggle-btn" data-mode="manual" id="btnManual">MANUAL</button>
+                                </div>
+                            </div>
+
+                            <!-- Manual Control -->
+                            <div class="manual-control" id="manualControl" style="display: none;">
+                                <label class="mode-label">Kontrol Manual:</label>
+                                <div class="toggle-group">
+                                    <button class="btn-control btn-on" id="btnRelayOn">ON</button>
+                                    <button class="btn-control btn-off" id="btnRelayOff">OFF</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Connection Status -->
+                <div class="status-bar">
+                    <div class="status-item">
+                        <span class="status-label">Status Koneksi:</span>
+                        <span class="status-value" id="connectionStatus">
+                            <span class="status-dot status-connecting"></span>
+                            Connecting...
+                        </span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Update Terakhir:</span>
+                        <span class="status-value" id="lastUpdate">-</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
