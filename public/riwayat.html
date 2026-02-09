@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Data - Monitoring PJU</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>⚡ MONITORING PJU</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="grafik.html" class="nav-item">
+                    <span class="icon">📈</span>
+                    <span>Grafik Output Sensor</span>
+                </a>
+                <a href="riwayat.html" class="nav-item active">
+                    <span class="icon">📋</span>
+                    <span>Riwayat Data</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <span class="icon">⚙️</span>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="nav-item" id="logoutBtn">
+                    <span class="icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>RIWAYAT DATA SENSOR</h1>
+                <div class="user-info">
+                    <span id="userName">Admin</span>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- Tab Switcher -->
+                <div class="tab-container">
+                    <button class="tab-btn active" data-tab="raw">📊 Data Mentah</button>
+                    <button class="tab-btn" data-tab="maf">📈 Data MAF</button>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label>Dari Tanggal:</label>
+                        <input type="date" id="startDate" class="filter-input">
+                    </div>
+                    <div class="filter-group">
+                        <label>Sampai Tanggal:</label>
+                        <input type="date" id="endDate" class="filter-input">
+                    </div>
+                    <button class="btn btn-primary" id="btnFilter">🔍 Filter</button>
+                    <button class="btn btn-secondary" id="btnReset">🔄 Reset</button>
+                </div>
+
+                <!-- Table Container -->
+                <div class="table-container">
+                    <!-- Tab Raw Data -->
+                    <div id="tabRaw" class="tab-content active">
+                        <div class="table-header">
+                            <h3>Data Mentah (Raw Sensor Data)</h3>
+                            <button class="btn btn-success" id="btnExportRaw">📥 Export CSV</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Tanggal/Waktu</th>
+                                        <th>Tegangan (V)</th>
+                                        <th>Arus (A)</th>
+                                        <th>Cahaya (Lux)</th>
+                                        <th>Gerak</th>
+                                        <th>Status Relay</th>
+                                        <th>Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBodyRaw">
+                                    <tr>
+                                        <td colspan="8" class="text-center">Loading data...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination" id="paginationRaw"></div>
+                    </div>
+
+                    <!-- Tab MAF Data -->
+                    <div id="tabMAF" class="tab-content">
+                        <div class="table-header">
+                            <h3>Data MAF (Moving Average Filtered)</h3>
+                            <button class="btn btn-success" id="btnExportMAF">📥 Export CSV</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Tanggal/Waktu</th>
+                                        <th>MAF Tegangan (V)</th>
+                                        <th>MAF Arus (A)</th>
+                                        <th>MAF Cahaya (Lux)</th>
+                                        <th>Gerak</th>
+                                        <th>Status Relay</th>
+                                        <th>Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBodyMAF">
+                                    <tr>
+                                        <td colspan="8" class="text-center">Loading data...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination" id="paginationMAF"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/riwayat.js"></script>
+</body>
+</html>
