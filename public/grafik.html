@@ -3,57 +3,523 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grafik Sensor - Monitoring PJU</title>
-    <link rel="stylesheet" href="css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Grafik Sensor - Sensor Lampu Penerangan Jalan</title>
+    <style>
+        /* =========================================
+           RESET & BASE STYLES
+           ========================================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        /* =========================================
+           LAYOUT
+           ========================================= */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* =========================================
+           SIDEBAR
+           ========================================= */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 0;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-logo {
+            width: 70px;
+            height: 70px;
+            background: white;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .sidebar-logo img {
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+        }
+
+        .sidebar-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+
+        .sidebar-subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            font-size: 15px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: #4A90E2;
+        }
+
+        .nav-item.active {
+            background: rgba(74, 144, 226, 0.2);
+            color: white;
+            border-left-color: #4A90E2;
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            min-width: 30px;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: auto;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #4A90E2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .user-role {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        /* =========================================
+           MAIN CONTENT
+           ========================================= */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 0;
+        }
+
+        .content-header {
+            background: white;
+            padding: 25px 40px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-bottom: 2px solid #4A90E2;
+        }
+
+        .content-header h1 {
+            font-size: 26px;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .content-subtitle {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .content-body {
+            padding: 30px 40px;
+        }
+
+        /* =========================================
+           ESP32 CONNECTION STATUS
+           ========================================= */
+        .esp-status-bar {
+            background: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .esp-status-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.connected {
+            background: #27ae60;
+            box-shadow: 0 0 10px rgba(39, 174, 96, 0.5);
+        }
+
+        .status-dot.disconnected {
+            background: #e74c3c;
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .status-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .status-value {
+            font-size: 15px;
+            color: #7f8c8d;
+        }
+
+        .last-update {
+            font-size: 13px;
+            color: #95a5a6;
+        }
+
+        /* =========================================
+           CHARTS SECTION
+           ========================================= */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .chart-card:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .chart-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .chart-icon {
+            font-size: 28px;
+        }
+
+        .chart-info {
+            background: #f8f9fc;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #7f8c8d;
+            font-weight: 600;
+        }
+
+        .chart-body {
+            position: relative;
+            height: 350px;
+        }
+
+        /* Legend */
+        .legend-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-top: 30px;
+        }
+
+        .legend-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-items {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background: #f8f9fc;
+            border-radius: 25px;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+        }
+
+        .legend-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* =========================================
+           RESPONSIVE
+           ========================================= */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+
+            .main-content {
+                margin-left: 240px;
+            }
+
+            .chart-body {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+
+            .sidebar-header {
+                padding: 20px 10px;
+            }
+
+            .sidebar-logo {
+                width: 50px;
+                height: 50px;
+            }
+
+            .sidebar-title,
+            .sidebar-subtitle,
+            .nav-item span:not(.nav-icon),
+            .sidebar-footer {
+                display: none;
+            }
+
+            .nav-item {
+                justify-content: center;
+                padding: 15px;
+            }
+
+            .nav-icon {
+                margin-right: 0;
+            }
+
+            .main-content {
+                margin-left: 70px;
+            }
+
+            .content-header,
+            .content-body {
+                padding: 20px;
+            }
+
+            .chart-body {
+                height: 250px;
+            }
+
+            .esp-status-bar {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .legend-items {
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content-header h1 {
+                font-size: 20px;
+            }
+
+            .chart-title {
+                font-size: 16px;
+            }
+
+            .chart-info {
+                font-size: 11px;
+                padding: 6px 12px;
+            }
+
+            .chart-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="app-container">
+    <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2>⚡ MONITORING PJU</h2>
+                <div class="sidebar-logo">
+                    <img src="assets/logo-uho.png" alt="Logo UHO">
+                </div>
+                <div class="sidebar-title">MONITORING PENERANGAN JALAN</div>
+                <div class="sidebar-subtitle">Solar Cell - MAF</div>
             </div>
+
             <nav class="sidebar-nav">
                 <a href="dashboard.html" class="nav-item">
-                    <span class="icon">📊</span>
+                    <span class="nav-icon">📊</span>
                     <span>Dashboard</span>
                 </a>
                 <a href="grafik.html" class="nav-item active">
-                    <span class="icon">📈</span>
-                    <span>Grafik Output Sensor</span>
+                    <span class="nav-icon">📈</span>
+                    <span>Grafik Sensor</span>
                 </a>
                 <a href="riwayat.html" class="nav-item">
-                    <span class="icon">📋</span>
+                    <span class="nav-icon">📋</span>
                     <span>Riwayat Data</span>
                 </a>
                 <a href="settings.html" class="nav-item">
-                    <span class="icon">⚙️</span>
+                    <span class="nav-icon">⚙️</span>
                     <span>Settings</span>
                 </a>
                 <a href="#" class="nav-item" id="logoutBtn">
-                    <span class="icon">🚪</span>
+                    <span class="nav-icon">🚪</span>
                     <span>Logout</span>
                 </a>
             </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">👤</div>
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Admin</div>
+                        <div class="user-role">Administrator</div>
+                    </div>
+                </div>
+            </div>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="content-header">
-                <h1>GRAFIK OUTPUT SENSOR</h1>
-                <div class="user-info">
-                    <span id="userName">Admin</span>
-                </div>
-            </header>
+            <!-- Header -->
+            <div class="content-header">
+                <h1>Grafik Output Sensor</h1>
+                <div class="content-subtitle">Visualisasi Data Sensor Real-time (100 Data Terakhir)</div>
+            </div>
 
+            <!-- Content Body -->
             <div class="content-body">
+                <!-- ESP32 Connection Status -->
+                <div class="esp-status-bar">
+                    <div class="esp-status-item">
+                        <div class="status-dot" id="espStatusDot"></div>
+                        <div>
+                            <div class="status-label">Status ESP32</div>
+                            <div class="status-value" id="espStatusText">Connecting...</div>
+                        </div>
+                    </div>
+                    <div class="esp-status-item">
+                        <div class="last-update">Update terakhir: <strong id="lastUpdateTime">-</strong></div>
+                    </div>
+                </div>
+
+                <!-- Charts Container -->
                 <div class="charts-container">
                     <!-- Chart Tegangan -->
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3>📊 Grafik Tegangan</h3>
-                            <span class="chart-info">100 Data Terakhir</span>
+                            <div class="chart-title">
+                                <span class="chart-icon">⚡</span>
+                                <span>Grafik Sensor Tegangan</span>
+                            </div>
+                            <div class="chart-info">100 Data Terakhir</div>
                         </div>
                         <div class="chart-body">
                             <canvas id="chartTegangan"></canvas>
@@ -63,8 +529,11 @@
                     <!-- Chart Arus -->
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3>📊 Grafik Arus</h3>
-                            <span class="chart-info">100 Data Terakhir</span>
+                            <div class="chart-title">
+                                <span class="chart-icon">🔌</span>
+                                <span>Grafik Sensor Arus</span>
+                            </div>
+                            <div class="chart-info">100 Data Terakhir</div>
                         </div>
                         <div class="chart-body">
                             <canvas id="chartArus"></canvas>
@@ -74,8 +543,11 @@
                     <!-- Chart Cahaya -->
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3>📊 Grafik Cahaya</h3>
-                            <span class="chart-info">100 Data Terakhir</span>
+                            <div class="chart-title">
+                                <span class="chart-icon">💡</span>
+                                <span>Grafik Sensor Cahaya</span>
+                            </div>
+                            <div class="chart-info">100 Data Terakhir</div>
                         </div>
                         <div class="chart-body">
                             <canvas id="chartCahaya"></canvas>
@@ -83,37 +555,499 @@
                     </div>
                 </div>
 
-                <!-- Legend Info -->
-                <div class="legend-info">
-                    <div class="legend-item">
-                        <span class="legend-color" style="background: #3498db;"></span>
-                        <span>Data Mentah (Raw)</span>
+                <!-- Legend -->
+                <div class="legend-container">
+                    <div class="legend-title">
+                        <span>ℹ️</span>
+                        <span>Keterangan Grafik</span>
                     </div>
-                    <div class="legend-item">
-                        <span class="legend-color" style="background: #e74c3c;"></span>
-                        <span>Data MAF (Filtered)</span>
-                    </div>
-                </div>
-
-                <!-- Status Bar -->
-                <div class="status-bar">
-                    <div class="status-item">
-                        <span class="status-label">Status Koneksi:</span>
-                        <span class="status-value" id="connectionStatus">
-                            <span class="status-dot status-connecting"></span>
-                            Connecting...
-                        </span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Update Terakhir:</span>
-                        <span class="status-value" id="lastUpdate">-</span>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #4A90E2;"></div>
+                            <div class="legend-text">Data Mentah (Raw)</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #e74c3c;"></div>
+                            <div class="legend-text">Data MAF (Filtered)</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-    <script src="js/grafik.js"></script>
+    <script>
+        // =========================================
+        // CHECK AUTHENTICATION
+        // =========================================
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/check');
+                const data = await response.json();
+                
+                if (!data.success) {
+                    window.location.href = 'login.html';
+                } else {
+                    document.getElementById('userName').textContent = data.user.username;
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+                window.location.href = 'login.html';
+            }
+        }
+
+        checkAuth();
+
+        // =========================================
+        // WEBSOCKET CONNECTION
+        // =========================================
+        const socket = io();
+
+        // DOM Elements
+        const espStatusDot = document.getElementById('espStatusDot');
+        const espStatusText = document.getElementById('espStatusText');
+        const lastUpdateTime = document.getElementById('lastUpdateTime');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // ESP32 Connection Tracking
+        let lastDataReceived = null;
+        let connectionCheckInterval = null;
+
+        // Chart instances
+        let chartTegangan = null;
+        let chartArus = null;
+        let chartCahaya = null;
+
+        // Data arrays (max 100 data points)
+        const maxDataPoints = 100;
+        let dataLabels = [];
+        let dataTegangan = [];
+        let dataMafTegangan = [];
+        let dataArus = [];
+        let dataMafArus = [];
+        let dataCahaya = [];
+        let dataMafCahaya = [];
+
+        // =========================================
+        // WEBSOCKET EVENTS
+        // =========================================
+        socket.on('connect', () => {
+            console.log('✅ WebSocket connected');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('❌ WebSocket disconnected');
+        });
+
+        socket.on('sensor_update', (data) => {
+            console.log('📡 Sensor update:', data);
+            updateCharts(data);
+            updateESPStatus(true);
+            lastUpdateTime.textContent = formatDateTime(data.timestamp || new Date().toISOString());
+        });
+
+        // =========================================
+        // LOAD INITIAL DATA
+        // =========================================
+        async function loadHistoryData() {
+            try {
+                const response = await fetch('/api/sensor/history?limit=100');
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    // Reset arrays
+                    dataLabels = [];
+                    dataTegangan = [];
+                    dataMafTegangan = [];
+                    dataArus = [];
+                    dataMafArus = [];
+                    dataCahaya = [];
+                    dataMafCahaya = [];
+                    
+                    // Populate arrays
+                    result.data.forEach((item, index) => {
+                        dataLabels.push(index + 1);
+                        dataTegangan.push(parseFloat(item.tegangan));
+                        dataMafTegangan.push(parseFloat(item.maf_tegangan || item.tegangan));
+                        dataArus.push(parseFloat(item.arus));
+                        dataMafArus.push(parseFloat(item.maf_arus || item.arus));
+                        dataCahaya.push(parseFloat(item.cahaya));
+                        dataMafCahaya.push(parseFloat(item.maf_cahaya || item.cahaya));
+                    });
+                    
+                    // Update charts
+                    updateAllCharts();
+                    
+                    if (result.data.length > 0) {
+                        updateESPStatus(true);
+                    }
+                }
+            } catch (error) {
+                console.error('Load history error:', error);
+            }
+        }
+
+        // =========================================
+        // INITIALIZE CHARTS
+        // =========================================
+        function initCharts() {
+            // Chart Tegangan
+            const ctxTegangan = document.getElementById('chartTegangan').getContext('2d');
+            chartTegangan = new Chart(ctxTegangan, {
+                type: 'line',
+                data: {
+                    labels: dataLabels,
+                    datasets: [
+                        {
+                            label: 'Data Mentah',
+                            data: dataTegangan,
+                            borderColor: '#4A90E2',
+                            backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            fill: true
+                        },
+                        {
+                            label: 'Data MAF',
+                            data: dataMafTegangan,
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + ' V';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Tegangan (V)',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Data Point',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+            
+            // Chart Arus
+            const ctxArus = document.getElementById('chartArus').getContext('2d');
+            chartArus = new Chart(ctxArus, {
+                type: 'line',
+                data: {
+                    labels: dataLabels,
+                    datasets: [
+                        {
+                            label: 'Data Mentah',
+                            data: dataArus,
+                            borderColor: '#4A90E2',
+                            backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            fill: true
+                        },
+                        {
+                            label: 'Data MAF',
+                            data: dataMafArus,
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + ' A';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Arus (A)',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Data Point',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+            
+            // Chart Cahaya
+            const ctxCahaya = document.getElementById('chartCahaya').getContext('2d');
+            chartCahaya = new Chart(ctxCahaya, {
+                type: 'line',
+                data: {
+                    labels: dataLabels,
+                    datasets: [
+                        {
+                            label: 'Data Mentah',
+                            data: dataCahaya,
+                            borderColor: '#4A90E2',
+                            backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            fill: true
+                        },
+                        {
+                            label: 'Data MAF',
+                            data: dataMafCahaya,
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(0) + ' Lux';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Cahaya (Lux)',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Data Point',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+        }
+
+        // =========================================
+        // UPDATE FUNCTIONS
+        // =========================================
+        function updateCharts(data) {
+            // Add new data
+            dataLabels.push(dataLabels.length + 1);
+            dataTegangan.push(parseFloat(data.tegangan));
+            dataMafTegangan.push(parseFloat(data.maf_tegangan || data.tegangan));
+            dataArus.push(parseFloat(data.arus));
+            dataMafArus.push(parseFloat(data.maf_arus || data.arus));
+            dataCahaya.push(parseFloat(data.cahaya));
+            dataMafCahaya.push(parseFloat(data.maf_cahaya || data.cahaya));
+            
+            // Keep only last 100 data points
+            if (dataLabels.length > maxDataPoints) {
+                dataLabels.shift();
+                dataTegangan.shift();
+                dataMafTegangan.shift();
+                dataArus.shift();
+                dataMafArus.shift();
+                dataCahaya.shift();
+                dataMafCahaya.shift();
+                
+                // Re-index labels
+                dataLabels = dataLabels.map((_, index) => index + 1);
+            }
+            
+            updateAllCharts();
+        }
+
+        function updateAllCharts() {
+            // Update Tegangan
+            chartTegangan.data.labels = dataLabels;
+            chartTegangan.data.datasets[0].data = dataTegangan;
+            chartTegangan.data.datasets[1].data = dataMafTegangan;
+            chartTegangan.update('none');
+            
+            // Update Arus
+            chartArus.data.labels = dataLabels;
+            chartArus.data.datasets[0].data = dataArus;
+            chartArus.data.datasets[1].data = dataMafArus;
+            chartArus.update('none');
+            
+            // Update Cahaya
+            chartCahaya.data.labels = dataLabels;
+            chartCahaya.data.datasets[0].data = dataCahaya;
+            chartCahaya.data.datasets[1].data = dataMafCahaya;
+            chartCahaya.update('none');
+        }
+
+        function updateESPStatus(connected) {
+            lastDataReceived = Date.now();
+            
+            if (connected) {
+                espStatusDot.className = 'status-dot connected';
+                espStatusText.textContent = 'Terhubung';
+            } else {
+                espStatusDot.className = 'status-dot disconnected';
+                espStatusText.textContent = 'Terputus';
+            }
+        }
+
+        // Check ESP32 connection every second
+        connectionCheckInterval = setInterval(() => {
+            if (lastDataReceived) {
+                const timeSinceLastData = Date.now() - lastDataReceived;
+                
+                // If no data received for more than 60 seconds
+                if (timeSinceLastData > 60000) {
+                    updateESPStatus(false);
+                }
+            }
+        }, 1000);
+
+        function formatDateTime(timestamp) {
+            if (!timestamp) return '-';
+            
+            const date = new Date(timestamp);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            
+            return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+        }
+
+        // =========================================
+        // EVENT LISTENERS
+        // =========================================
+
+        // Logout
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                try {
+                    await fetch('/api/auth/logout', { method: 'POST' });
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+            }
+        });
+
+        // =========================================
+        // INITIALIZE
+        // =========================================
+        initCharts();
+        loadHistoryData();
+    </script>
 </body>
 </html>
