@@ -12,6 +12,7 @@ const session = require('express-session');
 const cors = require('cors');
 const http = require('http');
 const socketIO = require('socket.io');
+const path = require('path');
 
 // Import utilities
 const calculateMAF = require('./utils/maf');
@@ -31,9 +32,8 @@ const PORT = process.env.PORT || 3003;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
 
-// Session
+// Session (HARUS SEBELUM STATIC)
 app.use(session({
     secret: process.env.SESSION_SECRET || 'pju_secret_key_2025',
     resave: false,
@@ -45,6 +45,22 @@ app.use(session({
 }));
 
 // =========================================
+// ROOT ROUTE - AUTO REDIRECT
+// =========================================
+app.get('/', (req, res) => {
+    if (req.session.user) {
+        // User sudah login, redirect ke dashboard
+        res.redirect('/dashboard.html');
+    } else {
+        // User belum login, redirect ke login
+        res.redirect('/login.html');
+    }
+});
+
+// Serve static files SETELAH route '/'
+app.use(express.static('public'));
+
+// =========================================
 // DATABASE CONNECTION POOL
 // =========================================
 const pool = mysql.createPool({
@@ -54,13 +70,14 @@ const pool = mysql.createPool({
     database: process.env.DB_NAME || 'PJU_MAF',
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    timezone: '+08:00' // GMT+8
 });
 
 // Test koneksi database
 pool.getConnection()
     .then(conn => {
-        console.log('✅ Database connected successfully');
+        console.log('✅ Database connected successfully (Timezone: GMT+8)');
         conn.release();
     })
     .catch(err => {
@@ -220,7 +237,7 @@ app.post('/api/sensor/data', async (req, res) => {
                 `Sensor Arus: ${errorDetection.errors.arus || 'OK'}\n` +
                 `Sensor Cahaya: ${errorDetection.errors.cahaya || 'OK'}\n` +
                 `Status Buzzer: Aktif\n` +
-                `Waktu: ${new Date().toLocaleString('id-ID')}`;
+                `Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Makassar' })}`;
             
             await sendTelegramNotification(errorMessage);
             sensorErrorNotified = true;
@@ -288,7 +305,7 @@ app.post('/api/sensor/data', async (req, res) => {
                 `Cahaya: ${cahaya} Lux\n` +
                 `Gerak: ${gerak ? 'Terdeteksi' : 'Tidak Terdeteksi'}\n` +
                 `Mode: ${relayMode.toUpperCase()}\n` +
-                `Waktu: ${new Date().toLocaleString('id-ID')}`;
+                `Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Makassar' })}`;
             
             await sendTelegramNotification(notifMessage);
             lastRelayStatus = newRelayCommand;
@@ -345,7 +362,7 @@ app.get('/api/sensor/latest', isAuthenticated, async (req, res) => {
     }
 });
 
-// Get history (500 data terakhir untuk grafik)
+// Get history (100 data terakhir untuk grafik)
 app.get('/api/sensor/history', isAuthenticated, async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 100;
@@ -408,6 +425,31 @@ app.get('/api/sensor/riwayat', isAuthenticated, async (req, res) => {
     } catch (error) {
         console.error('Get riwayat error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// =========================================
+// API: DELETE ALL SENSOR DATA
+// =========================================
+app.delete('/api/sensor/delete-all', isAuthenticated, async (req, res) => {
+    try {
+        // Delete all data from sensor_data table
+        await pool.query('DELETE FROM sensor_data');
+        
+        // Reset auto increment
+        await pool.query('ALTER TABLE sensor_data AUTO_INCREMENT = 1');
+        
+        res.json({ 
+            success: true, 
+            message: 'Semua data sensor berhasil dihapus' 
+        });
+
+    } catch (error) {
+        console.error('Delete all data error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server error' 
+        });
     }
 });
 
@@ -572,21 +614,7 @@ server.listen(PORT, () => {
     ║  🚀 SERVER MONITORING PJU SOLAR CELL     ║
     ║  📡 Port: ${PORT}                           ║
     ║  🌐 http://localhost:${PORT}               ║
+    ║  ⏰ Timezone: Asia/Makassar (GMT+8)      ║
     ╚═══════════════════════════════════════════╝
     `);
 });
-
-// Create default admin user if not exists
-(async () => {
-    try {
-        const [users] = await pool.query('SELECT * FROM users WHERE username = ?', ['admin']);
-        
-        if (users.length === 0) {
-            const hashedPassword = await bcrypt.hash('admin123', 10);
-            await pool.query('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', ['admin', hashedPassword, 'admin']);
-            console.log('✅ Default admin user created (admin/admin123)');
-        }
-    } catch (error) {
-        console.error('Error creating default user:', error);
-    }
-})();
