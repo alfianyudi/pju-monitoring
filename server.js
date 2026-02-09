@@ -2,6 +2,7 @@
 // SERVER.JS - Main Backend Server
 // Sistem Monitoring PJU Solar Cell dengan MAF
 // =========================================
+process.env.TZ = 'Asia/Makassar'; // WITA - Sulawesi (GMT+8)
 
 require('dotenv').config();
 const express = require('express');
