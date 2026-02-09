@@ -5,86 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Sistem Monitoring PJU</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/login.css">
 </head>
 <body class="login-page">
-    <div class="login-container">
-        <div class="login-box">
-            <div class="login-header">
-                <h1>⚡ SISTEM MONITORING PJU</h1>
-                <p>Lampu Penerangan Jalan Solar Cell</p>
+    <div class="login-wrapper">
+        <div class="login-container">
+            <!-- University Logo -->
+            <div class="university-logo">
+                <img src="assets/logo-uho.png" alt="Logo Universitas Halu Oleo">
             </div>
-            
-            <form id="loginForm" class="login-form">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" placeholder="Masukkan username" required>
+
+            <!-- Thesis Title -->
+            <div class="thesis-info">
+                <h1 class="thesis-title">
+                    MONITORING KINERJA SENSOR PADA LAMPU PENERANGAN JALAN SOLAR CELL MENGGUNAKAN METODE MOVING AVERAGE FILTER (MAF) BERBASIS INTERNET of THINGS (IoT)
+                </h1>
+            </div>
+
+            <!-- Student Info -->
+            <div class="student-info">
+                <p class="student-name">Muhammad Farhan</p>
+                <p class="student-nim">E1E119067</p>
+                <p class="student-major">Teknik Informatika - Fakultas Teknik</p>
+                <p class="student-university">Universitas Halu Oleo</p>
+            </div>
+
+            <!-- Login Box -->
+            <div class="login-box">
+                <div class="login-header">
+                    <div class="login-icon">🔐</div>
+                    <h2>Login Sistem</h2>
+                    <p>Silakan masuk untuk mengakses dashboard</p>
                 </div>
                 
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="Masukkan password" required>
-                </div>
-                
-                <div id="errorMessage" class="error-message" style="display: none;"></div>
-                
-                <button type="submit" class="btn btn-primary btn-block">
-                    <span id="btnText">Login</span>
-                    <span id="btnLoading" style="display: none;">Loading...</span>
-                </button>
-            </form>
-            
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="username">
+                            <span class="label-icon">👤</span>
+                            Username
+                        </label>
+                        <input type="text" 
+                               id="username" 
+                               name="username" 
+                               placeholder="Masukkan username" 
+                               autocomplete="username"
+                               required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">
+                            <span class="label-icon">🔑</span>
+                            Password
+                        </label>
+                        <div class="password-input-wrapper">
+                            <input type="password" 
+                                   id="password" 
+                                   name="password" 
+                                   placeholder="Masukkan password" 
+                                   autocomplete="current-password"
+                                   required>
+                            <button type="button" class="toggle-password" id="togglePassword">
+                                <span class="eye-icon">👁️</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="errorMessage" class="error-message" style="display: none;"></div>
+                    
+                    <button type="submit" class="btn-login">
+                        <span id="btnText">Masuk</span>
+                        <span id="btnLoading" style="display: none;">
+                            <span class="spinner"></span> Loading...
+                        </span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Footer -->
             <div class="login-footer">
-                <p>&copy; 2025 Muhammad Farhan - E1E119067</p>
-                <p>Teknik Informatika - Universitas Halu Oleo</p>
+                <p class="copyright">&copy;Universitas Halu Oleo</p>
+                <p class="year">Tugas Akhir Skripsi</p>
             </div>
         </div>
     </div>
 
-    <script>
-        const loginForm = document.getElementById('loginForm');
-        const errorMessage = document.getElementById('errorMessage');
-        const btnText = document.getElementById('btnText');
-        const btnLoading = document.getElementById('btnLoading');
-
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            // Hide error
-            errorMessage.style.display = 'none';
-            
-            // Show loading
-            btnText.style.display = 'none';
-            btnLoading.style.display = 'inline';
-            
-            try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, password })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    window.location.href = 'dashboard.html';
-                } else {
-                    errorMessage.textContent = data.message;
-                    errorMessage.style.display = 'block';
-                }
-                
-            } catch (error) {
-                errorMessage.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
-                errorMessage.style.display = 'block';
-            } finally {
-                btnText.style.display = 'inline';
-                btnLoading.style.display = 'none';
-            }
-        });
-    </script>
+    <script src="js/login.js"></script>
 </body>
 </html>
