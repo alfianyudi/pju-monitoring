@@ -306,6 +306,12 @@ async function sendDataToServer(data) {
                 simulationState.manualControl = response.data.mode === 'manual';
             }
             
+            // ✅ HANDLE BUZZER TRIGGER
+            if (response.data.buzzer === true) {
+                const duration = response.data.buzzer_duration || 10000;
+                triggerBuzzer(duration, response.data.error_details);
+            }
+            
             return true;
         } else {
             console.error('❌ Server response error:', response.data.message);
@@ -320,6 +326,42 @@ async function sendDataToServer(data) {
         }
         return false;
     }
+}
+
+/**
+ * ✅ TRIGGER BUZZER (SIMULASI)
+ */
+function triggerBuzzer(duration, errorDetails) {
+    console.log(`
+╔═══════════════════════════════════════════════════════════════╗
+║  🚨 BUZZER TRIGGERED - SENSOR ERROR DETECTED                  ║
+╠═══════════════════════════════════════════════════════════════╣
+║  Duration    : ${(duration / 1000).toString().padStart(2)} seconds${' '.repeat(40)}║
+║  Error Details:                                               ║
+`);
+    
+    if (errorDetails) {
+        if (errorDetails.tegangan) {
+            console.log(`║  - Tegangan  : ${errorDetails.tegangan.padEnd(44)}║`);
+        }
+        if (errorDetails.arus) {
+            console.log(`║  - Arus      : ${errorDetails.arus.padEnd(44)}║`);
+        }
+        if (errorDetails.cahaya) {
+            console.log(`║  - Cahaya    : ${errorDetails.cahaya.padEnd(44)}║`);
+        }
+    }
+    
+    console.log(`╚═══════════════════════════════════════════════════════════════╝
+    `);
+    
+    // Simulasi buzzer ON
+    console.log('🔊 BUZZER: ON');
+    
+    // Set timeout untuk buzzer OFF
+    setTimeout(() => {
+        console.log('🔇 BUZZER: OFF\n');
+    }, duration);
 }
 
 /**
