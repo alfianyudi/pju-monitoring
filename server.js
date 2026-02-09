@@ -230,13 +230,21 @@ app.post('/api/sensor/data', async (req, res) => {
         // Deteksi error sensor
         const errorDetection = await detectSensorError(pool, { tegangan, arus, cahaya });
         
+        // ✅ FLAG UNTUK BUZZER
+        let buzzerTrigger = false;
+        let errorDetails = null;
+        
         if (errorDetection.hasError && !sensorErrorNotified) {
+            // Set flag buzzer
+            buzzerTrigger = true;
+            errorDetails = errorDetection.errors;
+            
             // Kirim notifikasi Telegram
             const errorMessage = `⚠️ GANGGUAN SENSOR TERDETEKSI!\n\n` +
                 `Sensor Tegangan: ${errorDetection.errors.tegangan || 'OK'}\n` +
                 `Sensor Arus: ${errorDetection.errors.arus || 'OK'}\n` +
                 `Sensor Cahaya: ${errorDetection.errors.cahaya || 'OK'}\n` +
-                `Status Buzzer: Aktif\n` +
+                `Status Buzzer: Aktif (10 detik)\n` +
                 `Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Makassar' })}`;
             
             await sendTelegramNotification(errorMessage);
@@ -327,10 +335,14 @@ app.post('/api/sensor/data', async (req, res) => {
         lastSensorData = latestData;
         io.emit('sensor_update', latestData);
 
+        // ✅ RESPONSE KE ESP32 DENGAN FLAG BUZZER
         res.json({ 
             success: true, 
             relay_command: newRelayCommand ? 'ON' : 'OFF',
-            mode: relayMode
+            mode: relayMode,
+            buzzer: buzzerTrigger,           // ✅ NEW: Flag buzzer
+            buzzer_duration: 10000,          // ✅ NEW: Duration dalam ms (10 detik)
+            error_details: errorDetails      // ✅ NEW: Detail error untuk debugging
         });
 
     } catch (error) {
