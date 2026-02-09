@@ -221,28 +221,3 @@ logoutBtn.addEventListener('click', async (e) => {
         }
     }
 });
-```
-
----
-
-## 📁 **File: `.gitignore`**
-```
-# Node modules
-node_modules/
-
-# Environment variables
-.env
-
-# Logs
-*.log
-npm-debug.log*
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
