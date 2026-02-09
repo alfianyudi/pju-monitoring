@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grafik Sensor - Monitoring PJU</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>⚡ MONITORING PJU</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="grafik.html" class="nav-item active">
+                    <span class="icon">📈</span>
+                    <span>Grafik Output Sensor</span>
+                </a>
+                <a href="riwayat.html" class="nav-item">
+                    <span class="icon">📋</span>
+                    <span>Riwayat Data</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <span class="icon">⚙️</span>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="nav-item" id="logoutBtn">
+                    <span class="icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>GRAFIK OUTPUT SENSOR</h1>
+                <div class="user-info">
+                    <span id="userName">Admin</span>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <div class="charts-container">
+                    <!-- Chart Tegangan -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>📊 Grafik Tegangan</h3>
+                            <span class="chart-info">100 Data Terakhir</span>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="chartTegangan"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart Arus -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>📊 Grafik Arus</h3>
+                            <span class="chart-info">100 Data Terakhir</span>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="chartArus"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart Cahaya -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>📊 Grafik Cahaya</h3>
+                            <span class="chart-info">100 Data Terakhir</span>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="chartCahaya"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legend Info -->
+                <div class="legend-info">
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #3498db;"></span>
+                        <span>Data Mentah (Raw)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #e74c3c;"></span>
+                        <span>Data MAF (Filtered)</span>
+                    </div>
+                </div>
+
+                <!-- Status Bar -->
+                <div class="status-bar">
+                    <div class="status-item">
+                        <span class="status-label">Status Koneksi:</span>
+                        <span class="status-value" id="connectionStatus">
+                            <span class="status-dot status-connecting"></span>
+                            Connecting...
+                        </span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Update Terakhir:</span>
+                        <span class="status-value" id="lastUpdate">-</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script src="js/grafik.js"></script>
+</body>
+</html>
