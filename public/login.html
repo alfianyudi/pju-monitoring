@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sistem Monitoring PJU</title>
+    <title>Login - PJU MAF</title>
     <style>
         /* =========================================
            RESET & BASE STYLES
@@ -61,7 +61,7 @@
         .logo-container {
             margin-bottom: 20px;
         }
-
+        
         .logo {
             width: 100px;
             height: 100px;
@@ -70,9 +70,10 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
+            /* font-size: 48px; */ /* Hapus ini */
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
             animation: logoFloat 3s ease-in-out infinite;
+            overflow: hidden; /* Tambah ini */
         }
 
         @keyframes logoFloat {
@@ -343,7 +344,9 @@
         <div class="login-header">
             <!-- Logo -->
             <div class="logo-container">
-                <div class="logo">🎓</div>
+                <div class="logo">
+                    <img src="assets/logo-uho.png" alt="Logo UHO" style="width: 80px; height: 80px; object-fit: contain;">
+                </div>
             </div>
 
             <!-- Thesis Title -->
