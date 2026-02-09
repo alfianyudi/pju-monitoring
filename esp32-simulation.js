@@ -2,6 +2,7 @@
 // ESP32 SIMULATION SCRIPT
 // Mensimulasikan data sensor dari ESP32 ke Server
 // =========================================
+process.env.TZ = 'Asia/Makassar';
 
 const axios = require('axios');
 
