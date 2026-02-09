@@ -3,149 +3,738 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Monitoring PJU</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Dashboard - Sensor Lampu Penerangan Jalan</title>
+    <style>
+        /* =========================================
+           RESET & BASE STYLES
+           ========================================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        /* =========================================
+           LAYOUT
+           ========================================= */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* =========================================
+           SIDEBAR
+           ========================================= */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 0;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-logo {
+            width: 70px;
+            height: 70px;
+            background: white;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .sidebar-logo img {
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            font-size: 15px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: #4A90E2;
+        }
+
+        .nav-item.active {
+            background: rgba(74, 144, 226, 0.2);
+            color: white;
+            border-left-color: #4A90E2;
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            min-width: 30px;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: auto;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #4A90E2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .user-role {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        /* =========================================
+           MAIN CONTENT
+           ========================================= */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 0;
+        }
+
+        .content-header {
+            background: white;
+            padding: 25px 40px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-bottom: 2px solid #4A90E2;
+        }
+
+        .content-header h1 {
+            font-size: 26px;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .content-subtitle {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .content-body {
+            padding: 30px 40px;
+        }
+
+        /* =========================================
+           STATUS ESP32 CONNECTION
+           ========================================= */
+        .esp-status-bar {
+            background: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .esp-status-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.connected {
+            background: #27ae60;
+            box-shadow: 0 0 10px rgba(39, 174, 96, 0.5);
+        }
+
+        .status-dot.disconnected {
+            background: #e74c3c;
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .status-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .status-value {
+            font-size: 15px;
+            color: #7f8c8d;
+        }
+
+        .last-update {
+            font-size: 13px;
+            color: #95a5a6;
+        }
+
+        /* =========================================
+           SENSOR CARDS
+           ========================================= */
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .sensor-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 5px solid;
+        }
+
+        .sensor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .sensor-card.blue { border-left-color: #4A90E2; }
+        .sensor-card.green { border-left-color: #27ae60; }
+        .sensor-card.yellow { border-left-color: #f39c12; }
+        .sensor-card.red { border-left-color: #e74c3c; }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .sensor-card.blue .card-icon { background: rgba(74, 144, 226, 0.1); }
+        .sensor-card.green .card-icon { background: rgba(39, 174, 96, 0.1); }
+        .sensor-card.yellow .card-icon { background: rgba(243, 156, 18, 0.1); }
+        .sensor-card.red .card-icon { background: rgba(231, 76, 60, 0.1); }
+
+        .card-title {
+            font-size: 14px;
+            color: #7f8c8d;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .card-unit {
+            font-size: 18px;
+            color: #95a5a6;
+            margin-left: 5px;
+        }
+
+        .card-time {
+            font-size: 13px;
+            color: #95a5a6;
+        }
+
+        /* =========================================
+           LAMP STATUS CARD (BESAR)
+           ========================================= */
+        .lamp-status-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .lamp-status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .lamp-status-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .lamp-status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .lamp-status-indicator.on {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .lamp-status-indicator.off {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(149, 165, 166, 0.3);
+        }
+
+        .lamp-icon {
+            font-size: 28px;
+        }
+
+        .lamp-status-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        /* Mode Control */
+        .mode-control {
+            background: #f8f9fc;
+            padding: 25px;
+            border-radius: 12px;
+        }
+
+        .mode-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .mode-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e6ed;
+            background: white;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #7f8c8d;
+        }
+
+        .mode-btn:hover {
+            border-color: #4A90E2;
+            background: rgba(74, 144, 226, 0.05);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+            color: white;
+            border-color: #4A90E2;
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+        }
+
+        /* Manual Control */
+        .manual-control {
+            background: #f8f9fc;
+            padding: 25px;
+            border-radius: 12px;
+        }
+
+        .manual-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .control-btn.on {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+        }
+
+        .control-btn.on:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(39, 174, 96, 0.4);
+        }
+
+        .control-btn.off {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .control-btn.off:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* =========================================
+           RESPONSIVE
+           ========================================= */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+
+            .main-content {
+                margin-left: 240px;
+            }
+
+            .sensor-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .lamp-status-body {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+
+            .sidebar-header {
+                padding: 20px 10px;
+            }
+
+            .sidebar-logo {
+                width: 50px;
+                height: 50px;
+            }
+
+            .sidebar-title,
+            .sidebar-subtitle,
+            .nav-item span:not(.nav-icon),
+            .sidebar-footer {
+                display: none;
+            }
+
+            .nav-item {
+                justify-content: center;
+                padding: 15px;
+            }
+
+            .nav-icon {
+                margin-right: 0;
+            }
+
+            .main-content {
+                margin-left: 70px;
+            }
+
+            .content-header,
+            .content-body {
+                padding: 20px;
+            }
+
+            .sensor-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .esp-status-bar {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content-header h1 {
+                font-size: 20px;
+            }
+
+            .card-value {
+                font-size: 28px;
+            }
+
+            .lamp-status-title {
+                font-size: 18px;
+            }
+
+            .mode-buttons,
+            .manual-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="app-container">
+    <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2>⚡ MONITORING PJU</h2>
+                <div class="sidebar-logo">
+                    <img src="assets/logo-uho.png" alt="Logo UHO">
+                </div>
+                <div class="sidebar-title">MONITORING PJU</div>
+                <div class="sidebar-subtitle">Solar Cell - MAF</div>
             </div>
+
             <nav class="sidebar-nav">
                 <a href="dashboard.html" class="nav-item active">
-                    <span class="icon">📊</span>
+                    <span class="nav-icon">📊</span>
                     <span>Dashboard</span>
                 </a>
                 <a href="grafik.html" class="nav-item">
-                    <span class="icon">📈</span>
-                    <span>Grafik Output Sensor</span>
+                    <span class="nav-icon">📈</span>
+                    <span>Grafik Sensor</span>
                 </a>
                 <a href="riwayat.html" class="nav-item">
-                    <span class="icon">📋</span>
+                    <span class="nav-icon">📋</span>
                     <span>Riwayat Data</span>
                 </a>
                 <a href="settings.html" class="nav-item">
-                    <span class="icon">⚙️</span>
+                    <span class="nav-icon">⚙️</span>
                     <span>Settings</span>
                 </a>
                 <a href="#" class="nav-item" id="logoutBtn">
-                    <span class="icon">🚪</span>
+                    <span class="nav-icon">🚪</span>
                     <span>Logout</span>
                 </a>
             </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">👤</div>
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Admin</div>
+                        <div class="user-role">Administrator</div>
+                    </div>
+                </div>
+            </div>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="content-header">
-                <h1>SISTEM MONITORING LAMPU PENERANGAN JALAN</h1>
-                <div class="user-info">
-                    <span id="userName">Admin</span>
-                </div>
-            </header>
+            <!-- Header -->
+            <div class="content-header">
+                <h1>Dashboard Monitoring</h1>
+                <div class="content-subtitle">Sistem Monitoring Lampu Penerangan Jalan Solar Cell</div>
+            </div>
 
+            <!-- Content Body -->
             <div class="content-body">
+                <!-- ESP32 Connection Status -->
+                <div class="esp-status-bar">
+                    <div class="esp-status-item">
+                        <div class="status-dot" id="espStatusDot"></div>
+                        <div>
+                            <div class="status-label">Status ESP32</div>
+                            <div class="status-value" id="espStatusText">Connecting...</div>
+                        </div>
+                    </div>
+                    <div class="esp-status-item">
+                        <div class="last-update">Update terakhir: <strong id="lastUpdateTime">-</strong></div>
+                    </div>
+                </div>
+
                 <!-- Sensor Cards -->
                 <div class="sensor-grid">
                     <!-- Tegangan -->
-                    <div class="sensor-card card-blue">
-                        <div class="card-icon">⚡</div>
-                        <div class="card-content">
-                            <h3>Tegangan</h3>
-                            <div class="card-value">
-                                <span id="teganganValue">0</span>
-                                <span class="unit">V</span>
-                            </div>
-                            <div class="card-time" id="teganganTime">-</div>
+                    <div class="sensor-card blue">
+                        <div class="card-header">
+                            <div class="card-icon">⚡</div>
+                            <div class="card-title">Sensor Tegangan</div>
                         </div>
+                        <div class="card-value">
+                            <span id="teganganValue">0.00</span>
+                            <span class="card-unit">V</span>
+                        </div>
+                        <div class="card-time" id="teganganTime">-</div>
                     </div>
 
                     <!-- Arus -->
-                    <div class="sensor-card card-green">
-                        <div class="card-icon">🔌</div>
-                        <div class="card-content">
-                            <h3>Sensor Arus</h3>
-                            <div class="card-value">
-                                <span id="arusValue">0</span>
-                                <span class="unit">A</span>
-                            </div>
-                            <div class="card-time" id="arusTime">-</div>
+                    <div class="sensor-card green">
+                        <div class="card-header">
+                            <div class="card-icon">🔌</div>
+                            <div class="card-title">Sensor Arus</div>
                         </div>
+                        <div class="card-value">
+                            <span id="arusValue">0.00</span>
+                            <span class="card-unit">A</span>
+                        </div>
+                        <div class="card-time" id="arusTime">-</div>
                     </div>
 
                     <!-- Cahaya -->
-                    <div class="sensor-card card-yellow">
-                        <div class="card-icon">💡</div>
-                        <div class="card-content">
-                            <h3>Cahaya</h3>
-                            <div class="card-value">
-                                <span id="cahayaValue">0</span>
-                                <span class="unit">Lux</span>
-                            </div>
-                            <div class="card-time" id="cahayaTime">-</div>
+                    <div class="sensor-card yellow">
+                        <div class="card-header">
+                            <div class="card-icon">💡</div>
+                            <div class="card-title">Sensor Cahaya</div>
                         </div>
+                        <div class="card-value">
+                            <span id="cahayaValue">0</span>
+                            <span class="card-unit">Lux</span>
+                        </div>
+                        <div class="card-time" id="cahayaTime">-</div>
                     </div>
 
-                    <!-- Sensor Gerak -->
-                    <div class="sensor-card card-red">
-                        <div class="card-icon">🚶</div>
-                        <div class="card-content">
-                            <h3>Sensor Gerak</h3>
-                            <div class="card-value">
-                                <span id="gerakValue">Tidak Terdeteksi</span>
-                            </div>
-                            <div class="card-time" id="gerakTime">-</div>
+                    <!-- Gerak -->
+                    <div class="sensor-card red">
+                        <div class="card-header">
+                            <div class="card-icon">🚶</div>
+                            <div class="card-title">Sensor Gerak</div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Control Panel -->
-                <div class="control-panel">
-                    <div class="control-card">
-                        <div class="control-header">
-                            <h3>🔦 Kontrol Lampu</h3>
-                            <div class="relay-status" id="relayStatusIndicator">
-                                <span class="status-dot status-off"></span>
-                                <span id="relayStatusText">OFF</span>
-                            </div>
+                        <div class="card-value">
+                            <span id="gerakValue">Tidak Terdeteksi</span>
                         </div>
-
-                        <div class="control-body">
-                            <!-- Mode Toggle -->
-                            <div class="mode-control">
-                                <label class="mode-label">Mode Operasi:</label>
-                                <div class="toggle-group">
-                                    <button class="toggle-btn active" data-mode="auto" id="btnAuto">AUTO</button>
-                                    <button class="toggle-btn" data-mode="manual" id="btnManual">MANUAL</button>
-                                </div>
-                            </div>
-
-                            <!-- Manual Control -->
-                            <div class="manual-control" id="manualControl" style="display: none;">
-                                <label class="mode-label">Kontrol Manual:</label>
-                                <div class="toggle-group">
-                                    <button class="btn-control btn-on" id="btnRelayOn">ON</button>
-                                    <button class="btn-control btn-off" id="btnRelayOff">OFF</button>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="card-time" id="gerakTime">-</div>
                     </div>
                 </div>
 
-                <!-- Connection Status -->
-                <div class="status-bar">
-                    <div class="status-item">
-                        <span class="status-label">Status Koneksi:</span>
-                        <span class="status-value" id="connectionStatus">
-                            <span class="status-dot status-connecting"></span>
-                            Connecting...
-                        </span>
+                <!-- Lamp Status & Control -->
+                <div class="lamp-status-card">
+                    <div class="lamp-status-header">
+                        <div class="lamp-status-title">
+                            <span>🔦</span>
+                            <span>Kontrol Lampu PJU</span>
+                        </div>
+                        <div class="lamp-status-indicator" id="lampStatusIndicator">
+                            <span class="lamp-icon">💡</span>
+                            <span id="lampStatusText">MATI</span>
+                        </div>
                     </div>
-                    <div class="status-item">
-                        <span class="status-label">Update Terakhir:</span>
-                        <span class="status-value" id="lastUpdate">-</span>
+
+                    <div class="lamp-status-body">
+                        <!-- Mode Control -->
+                        <div class="mode-control">
+                            <div class="mode-label">Mode Operasi</div>
+                            <div class="mode-buttons">
+                                <button class="mode-btn active" id="btnAuto">AUTO</button>
+                                <button class="mode-btn" id="btnManual">MANUAL</button>
+                            </div>
+                        </div>
+
+                        <!-- Manual Control -->
+                        <div class="manual-control" id="manualControlSection" style="display: none;">
+                            <div class="mode-label">Kontrol Manual</div>
+                            <div class="manual-buttons">
+                                <button class="control-btn on" id="btnLampOn">ON</button>
+                                <button class="control-btn off" id="btnLampOff">OFF</button>
+                            </div>
+                        </div>
+
+                        <!-- Auto Mode Info -->
+                        <div class="mode-control" id="autoModeInfo">
+                            <div class="mode-label">Informasi Mode Auto</div>
+                            <div style="color: #7f8c8d; font-size: 14px; line-height: 1.6;">
+                                Lampu akan menyala otomatis saat:<br>
+                                • Cahaya < 200 Lux (Malam)<br>
+                                • Sensor PIR mendeteksi gerakan
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -153,6 +742,310 @@
     </div>
 
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-    <script src="js/dashboard.js"></script>
+    <script>
+        // =========================================
+        // CHECK AUTHENTICATION
+        // =========================================
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/check');
+                const data = await response.json();
+                
+                if (!data.success) {
+                    window.location.href = 'login.html';
+                } else {
+                    document.getElementById('userName').textContent = data.user.username;
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+                window.location.href = 'login.html';
+            }
+        }
+
+        checkAuth();
+
+        // =========================================
+        // WEBSOCKET CONNECTION
+        // =========================================
+        const socket = io();
+
+        // DOM Elements
+        const espStatusDot = document.getElementById('espStatusDot');
+        const espStatusText = document.getElementById('espStatusText');
+        const lastUpdateTime = document.getElementById('lastUpdateTime');
+
+        const teganganValue = document.getElementById('teganganValue');
+        const arusValue = document.getElementById('arusValue');
+        const cahayaValue = document.getElementById('cahayaValue');
+        const gerakValue = document.getElementById('gerakValue');
+
+        const teganganTime = document.getElementById('teganganTime');
+        const arusTime = document.getElementById('arusTime');
+        const cahayaTime = document.getElementById('cahayaTime');
+        const gerakTime = document.getElementById('gerakTime');
+
+        const lampStatusIndicator = document.getElementById('lampStatusIndicator');
+        const lampStatusText = document.getElementById('lampStatusText');
+
+        const btnAuto = document.getElementById('btnAuto');
+        const btnManual = document.getElementById('btnManual');
+        const manualControlSection = document.getElementById('manualControlSection');
+        const autoModeInfo = document.getElementById('autoModeInfo');
+        const btnLampOn = document.getElementById('btnLampOn');
+        const btnLampOff = document.getElementById('btnLampOff');
+
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // ESP32 Connection Tracking
+        let lastDataReceived = null;
+        let connectionCheckInterval = null;
+
+        // =========================================
+        // WEBSOCKET EVENTS
+        // =========================================
+        socket.on('connect', () => {
+            console.log('✅ WebSocket connected');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('❌ WebSocket disconnected');
+        });
+
+        socket.on('sensor_update', (data) => {
+            console.log('📡 Sensor update:', data);
+            updateDashboard(data);
+            updateESPStatus(true); // ESP32 is sending data
+        });
+
+        socket.on('relay_changed', (data) => {
+            console.log('🔦 Relay changed:', data);
+            updateLampStatus(data.status);
+        });
+
+        socket.on('mode_changed', (data) => {
+            console.log('⚙️ Mode changed:', data);
+            updateModeUI(data.mode);
+        });
+
+        // =========================================
+        // LOAD INITIAL DATA
+        // =========================================
+        async function loadInitialData() {
+            try {
+                // Load sensor data
+                const sensorResponse = await fetch('/api/sensor/latest');
+                const sensorData = await sensorResponse.json();
+                
+                if (sensorData.success && sensorData.data) {
+                    updateDashboard(sensorData.data);
+                    updateESPStatus(true);
+                }
+
+                // Load relay status
+                const relayResponse = await fetch('/api/relay/status');
+                const relayData = await relayResponse.json();
+                
+                if (relayData.success) {
+                    updateModeUI(relayData.mode);
+                    updateLampStatus(relayData.status);
+                }
+            } catch (error) {
+                console.error('Load initial data error:', error);
+            }
+        }
+
+        loadInitialData();
+
+        // =========================================
+        // UPDATE FUNCTIONS
+        // =========================================
+        function updateDashboard(data) {
+            // Update values
+            teganganValue.textContent = parseFloat(data.tegangan).toFixed(2);
+            arusValue.textContent = parseFloat(data.arus).toFixed(2);
+            cahayaValue.textContent = parseFloat(data.cahaya).toFixed(0);
+            gerakValue.textContent = data.gerak ? 'Terdeteksi' : 'Tidak Terdeteksi';
+
+            // Update time
+            const time = formatTime(data.created_at || data.timestamp);
+            teganganTime.textContent = `Update: ${time}`;
+            arusTime.textContent = `Update: ${time}`;
+            cahayaTime.textContent = `Update: ${time}`;
+            gerakTime.textContent = `Update: ${time}`;
+
+            // Update last update time
+            lastUpdateTime.textContent = formatDateTime(data.created_at || data.timestamp);
+
+            // Update lamp status
+            if (data.relay_status !== undefined) {
+                updateLampStatus(data.relay_status);
+            }
+        }
+
+        function updateLampStatus(status) {
+            if (status) {
+                lampStatusIndicator.className = 'lamp-status-indicator on';
+                lampStatusText.textContent = 'MENYALA';
+            } else {
+                lampStatusIndicator.className = 'lamp-status-indicator off';
+                lampStatusText.textContent = 'MATI';
+            }
+        }
+
+        function updateModeUI(mode) {
+            if (mode === 'auto') {
+                btnAuto.classList.add('active');
+                btnManual.classList.remove('active');
+                manualControlSection.style.display = 'none';
+                autoModeInfo.style.display = 'block';
+            } else {
+                btnAuto.classList.remove('active');
+                btnManual.classList.add('active');
+                manualControlSection.style.display = 'block';
+                autoModeInfo.style.display = 'none';
+            }
+        }
+
+        function updateESPStatus(connected) {
+            lastDataReceived = Date.now();
+            
+            if (connected) {
+                espStatusDot.className = 'status-dot connected';
+                espStatusText.textContent = 'Terhubung';
+            } else {
+                espStatusDot.className = 'status-dot disconnected';
+                espStatusText.textContent = 'Terputus';
+            }
+        }
+
+        // Check ESP32 connection every second
+        connectionCheckInterval = setInterval(() => {
+            if (lastDataReceived) {
+                const timeSinceLastData = Date.now() - lastDataReceived;
+                
+                // If no data received for more than 60 seconds (1 minute)
+                if (timeSinceLastData > 60000) {
+                    updateESPStatus(false);
+                }
+            }
+        }, 1000);
+
+        function formatTime(timestamp) {
+            if (!timestamp) return '-';
+            
+            const date = new Date(timestamp);
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+        function formatDateTime(timestamp) {
+            if (!timestamp) return '-';
+            
+            const date = new Date(timestamp);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            
+            return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+        }
+
+        // =========================================
+        // EVENT LISTENERS
+        // =========================================
+
+        // Mode toggle
+        btnAuto.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/relay/mode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode: 'auto' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateModeUI('auto');
+                }
+            } catch (error) {
+                console.error('Set mode error:', error);
+            }
+        });
+
+        btnManual.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/relay/mode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode: 'manual' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateModeUI('manual');
+                }
+            } catch (error) {
+                console.error('Set mode error:', error);
+            }
+        });
+
+        // Manual control
+        btnLampOn.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/relay/control', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: true })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error('Relay control error:', error);
+            }
+        });
+
+        btnLampOff.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/relay/control', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: false })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error('Relay control error:', error);
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                try {
+                    await fetch('/api/auth/logout', { method: 'POST' });
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+            }
+        });
+    </script>
 </body>
 </html>
