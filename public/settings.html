@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Monitoring PJU</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>⚡ MONITORING PJU</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="grafik.html" class="nav-item">
+                    <span class="icon">📈</span>
+                    <span>Grafik Output Sensor</span>
+                </a>
+                <a href="riwayat.html" class="nav-item">
+                    <span class="icon">📋</span>
+                    <span>Riwayat Data</span>
+                </a>
+                <a href="settings.html" class="nav-item active">
+                    <span class="icon">⚙️</span>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="nav-item" id="logoutBtn">
+                    <span class="icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>PENGATURAN SISTEM</h1>
+                <div class="user-info">
+                    <span id="userName">Admin</span>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <div class="settings-grid">
+                    <!-- System Configuration -->
+                    <div class="settings-card">
+                        <div class="settings-header">
+                            <h3>⚙️ Konfigurasi Sistem</h3>
+                        </div>
+                        <div class="settings-body">
+                            <form id="configForm">
+                                <div class="form-group">
+                                    <label for="lightThreshold">Threshold Cahaya (Lux)</label>
+                                    <input type="number" id="lightThreshold" name="lightThreshold" 
+                                           class="form-control" min="0" max="1000" step="10" required>
+                                    <small class="form-text">Batas cahaya untuk menentukan siang/malam (default: 200 Lux)</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="mafWindowSize">MAF Window Size</label>
+                                    <input type="number" id="mafWindowSize" name="mafWindowSize" 
+                                           class="form-control" min="3" max="50" step="1" required>
+                                    <small class="form-text">Jumlah sampel untuk Moving Average Filter (default: 10)</small>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        💾 Simpan Pengaturan
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" id="btnResetConfig">
+                                        🔄 Reset ke Default
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Change Password -->
+                    <div class="settings-card">
+                        <div class="settings-header">
+                            <h3>🔐 Ganti Password</h3>
+                        </div>
+                        <div class="settings-body">
+                            <form id="passwordForm">
+                                <div class="form-group">
+                                    <label for="oldPassword">Password Lama</label>
+                                    <input type="password" id="oldPassword" name="oldPassword" 
+                                           class="form-control" placeholder="Masukkan password lama" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="newPassword">Password Baru</label>
+                                    <input type="password" id="newPassword" name="newPassword" 
+                                           class="form-control" placeholder="Masukkan password baru" 
+                                           minlength="6" required>
+                                    <small class="form-text">Minimal 6 karakter</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="confirmPassword">Konfirmasi Password Baru</label>
+                                    <input type="password" id="confirmPassword" name="confirmPassword" 
+                                           class="form-control" placeholder="Ulangi password baru" 
+                                           minlength="6" required>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        🔑 Update Password
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Section -->
+                <div class="info-card">
+                    <div class="info-header">
+                        <h3>ℹ️ Informasi Sistem</h3>
+                    </div>
+                    <div class="info-body">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Nama Sistem:</span>
+                                <span class="info-value">Monitoring PJU Solar Cell dengan MAF</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Versi:</span>
+                                <span class="info-value">1.0.0</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Pengembang:</span>
+                                <span class="info-value">Muhammad Farhan (E1E119067)</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Institusi:</span>
+                                <span class="info-value">Teknik Informatika - Universitas Halu Oleo</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Tahun:</span>
+                                <span class="info-value">2025</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="js/settings.js"></script>
+</body>
+</html>
